@@ -118,7 +118,7 @@ void main()
 			U0CSR |= 0x40;//0100 0000 恢复接收
 			UartState = UART0_RX;
 			count = 0;//计数清零
-			memset(RxData,0,SIZE);//清空缓冲区
+			//memset(RxData,0,SIZE);//清空缓冲区
 
 		}
 
