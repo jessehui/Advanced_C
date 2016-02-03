@@ -4,8 +4,9 @@
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
+
 #define UART0_RX 1
-#define UART0_TX 2
+#define UART0_TX 2  //定义发送接收状态
 #define SIZE 	 51
 
 #define LED1 = P1_0
@@ -44,7 +45,7 @@ void initLED(void)
 
 void initUART()
 {
-	PERCFG = 0x00;//外设控制寄存器 设置USART0在位置0
+	PERCFG = 0x00;//外设控制寄存器 设置USART0在备用位置1
 	P0SEL = 0x0c;// 0000 1100;P0_2 P0_3作为串口（外设功能）
 	P2DIR &= ~0xc0//0011 1111;00表示uart0优先级最高
 
@@ -64,7 +65,8 @@ void UartSendString(char *data, int len)
 	for(i=0;i<len;i++)
 	{
 		U0DBUF = *data++;
-		while(UTX0IF == 0);
+		while(UTX0IF == 0);//等待 直到出现中断未决 说明处于发送状态 
+		//同时把该位清零 读下个数据
 		UTX0IF = 0;
 	}
 }
