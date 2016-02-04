@@ -176,7 +176,89 @@ void beepMode_sel(uchar num)
 	}
 }
 
+#pragma vector = URX0_VECTOR
+__interrupt void UART0_ISR(void)
+{
+	URX0IF = 0;//URX0IF == 1时表明有字符串发送进来 进入中断 接收
+	RxBuf = U0DBUF;//接收
 
+	if(uartState == UART0_RX) //判断是否处于接收状态 uartState初始状态会在主函数中定义
+	{
+		if(RxBuf != 0)
+		{
+			if( (RxBuf != '#') && (count < 50) )
+			{
+				RxData[count++] = RxBuf;
+			}
+			else
+			{	if (count >= 50)//超过50 数据非法 清零
+				{
+					count = 0;
+					memset(RxData,0,SIZE);//清空缓存区
+				}
+				else//只剩一种情况 就是发送了“#”
+					uartState = UART0_TX;//进入发送状态
+			}
+			RxBuf = 0;
+		}
+	}
 
+	if(uartState == UART0_TX) //发送状态
+	{
+		U0CSR &= ~0x40;
+		uartSendString(RxData, count);
+		U0CSR |= 0x40;
+		uartState = UART0_RX;
+		count = 0;
+
+		//由接收的字符判断LED和蜂鸣器的工作模式
+		if( strstr(RxData,"ledmode1") != NULL )
+		{
+			gManageMode = 1;
+		}
+
+		if( strstr(RxData,"ledmode2") != NULL )
+		{
+			gManageMode = 2;
+		}
+
+		if( strstr(RxData,"ledmode3") != NULL )
+		{
+			gManageMode = 3;
+		}
+
+		if( strstr(RxData,"beepmode1") != NULL )
+		{
+			beepMode = 1;
+		}
+
+		if( strstr(RxData,"beepmode2") != NULL )
+		{
+			beepMode = 2;
+		}
+
+	}
+
+}
+//把接收和发送程序放在中断中而不是放在主函数中是因为：
+//在LED和蜂鸣器的各种模式中 有很多延时函数 如果放在主函数中 可能没有延时完 就进入下一个中断了 造成错误
+
+void main(void)
+{
+	CLKCONCMD &= ~0x40;
+	while(CLKCONSTA & 0x40);
+	CLKCONCMD &= ~0x47;
+
+	initUart();
+	initLED();
+	uartState = UART0_RX;//初始化默认为接收模式
+	memset(RxData,0,SIZE);
+
+	while(1)
+	{
+		lightMode_sel(gManageMode);
+		beepMode_sel(beepMode);
+	}
+}
 
 
