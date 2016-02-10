@@ -18,6 +18,12 @@ OS_STK LED0_TASK_STK[LED0_STK_SIZE];
 //任务函数
 void led0Task(void *pdata);
 
+//****************Beep任务
+#define BEEP_TASK_PRIO		6
+#define BEEP_STK_SIZE		64
+OS_STK BEEP_TASK_STK[BEEP_STK_SIZE];
+void beepTask(void *pdata);
+
 void Delay(unsigned int t)
 {
 	while(t--);
@@ -43,8 +49,14 @@ void start_task(void *pdata)
 	OSTaskCreate(led0Task, 
 				(void *)0, 
 				(OS_STK *)LED0_TASK_STK[LED0_STK_SIZE-1],
-				LED0_TASK_PRIO);
+				LED0_TASK_PRIO);//创建LED任务
+	OSTaskCreate(beepTask, (void *)0, 
+				(OS_STK *)BEEP_TASK_STK[BEEP_STK_SIZE-1],
+				BEEP_TASK_PRIO);//创建BEEP任务
+	OSTaskSuspend(START_TASK_PRIO);//挂起起始任务
 	OS_EXIT_CRITICLE();		//退出临界区 可以被中断打断
+
+	OS_
 
 }
 
@@ -58,4 +70,16 @@ void led0Task(void *pdata)
 		CLOSE_LED0();
 		Delay(100000);
 	}
+}
+
+void beepTask(void *pdata)
+{
+	BEEP_Init();
+	while(1)
+	{
+		OPEN_BEEP();
+		Delay(100000);
+		CLOSE_BEEP();
+		Delay(100000);
+	}	
 }
