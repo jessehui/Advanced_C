@@ -32,10 +32,10 @@ void Delay(unsigned int t)
 int main(void)
 {
 	OSInit();
-	OSTaskCreate(start_task, 
-				(void *)0, //空指针 即NULL
-				(OS_STK *)START_TASK_STK[START_STK_SIZE - 1],//最后一个元素作为栈顶
-				START_TASK_PRIO);//创建起始任务
+	OSTaskCreate(	start_task, 
+			(void *)0, //空指针 即NULL
+			(OS_STK *)START_TASK_STK[START_STK_SIZE - 1],//最后一个元素作为栈顶
+			START_TASK_PRIO);//创建起始任务
 }
 
 void start_task(void *pdata)
@@ -46,13 +46,13 @@ void start_task(void *pdata)
 	delay_init(168);
 
 	OS_ENTER_CRITICLE();	//进入临界区 无法被中断打断
-	OSTaskCreate(led0Task, 
-				(void *)0, 
-				(OS_STK *)LED0_TASK_STK[LED0_STK_SIZE-1],
-				LED0_TASK_PRIO);//创建LED任务
-	OSTaskCreate(beepTask, (void *)0, 
-				(OS_STK *)BEEP_TASK_STK[BEEP_STK_SIZE-1],
-				BEEP_TASK_PRIO);//创建BEEP任务
+	OSTaskCreate(	led0Task, 
+			(void *)0, 
+			(OS_STK *)LED0_TASK_STK[LED0_STK_SIZE-1],
+			LED0_TASK_PRIO);//创建LED任务
+	OSTaskCreate(	beepTask, (void *)0, 
+			(OS_STK *)BEEP_TASK_STK[BEEP_STK_SIZE-1],
+			BEEP_TASK_PRIO);//创建BEEP任务
 	OSTaskSuspend(START_TASK_PRIO);//挂起起始任务
 	OS_EXIT_CRITICLE();		//退出临界区 可以被中断打断
 
