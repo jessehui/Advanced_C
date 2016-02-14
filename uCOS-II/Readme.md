@@ -112,3 +112,11 @@ OS_IntExit( );//退出中断函数
 
 通信录功能所需硬件资源：
 LED，蜂鸣器，输入按键，TFLCD屏幕，uart串口可以用于打印信息
+
+12
+
+OSTaskCreateExt 任务创建
+INT16U opt参数：取值范围有3种
+OS_TASK_OPT_STK_CHK 使用任务堆栈检查功能
+OS_TASK_OPT_STK_CLR 使用任务堆栈清零功能
+OS_TASK_OPT_SAVE_FP 如果硬件支持浮点数运算 可以用浮点数来保存一些信息
