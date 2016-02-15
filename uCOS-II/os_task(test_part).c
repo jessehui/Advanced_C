@@ -96,4 +96,17 @@ INT8U OSTaskNameGet(INT8U prio,
 		 // OS_ERR_TASK_SUSPEND_PRIO  if the task to suspend doesn't exist
 		 // OS_ERR_TASK_NOT_EXIST	   if the task is assigned to a mutex 
 #if OS_TASK_SUSPEND_EN > 0u
-INT8U OSTaskSuspend(INT8U prio)		    
+INT8U OSTaskSuspend(INT8U prio)	
+{}
+
+// *******************************************************
+// 			Time Delay
+void OSTimeDly(INT32U ticks)
+{}
+
+// *******************************************************
+// 	Time Delay Hour Minute Second Millisecond
+#if OS_TIME_DLY_HMSM_EN > 0u
+void OSTimeDlyHMSM(INT8U hours, INT8U minutes, INT8U seconds, INT16U ms)
+
+
