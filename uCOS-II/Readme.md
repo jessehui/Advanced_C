@@ -230,7 +230,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
                    INT8U     *perr)//等待
 
 INT8U  OSMutexPost (OS_EVENT *pevent)//发送
-
+```
 例如串口作为共享资源,如果在led beep key任务中都需要使用串口打印, 就需要对串口资源进行保护
 
 20
