@@ -144,3 +144,91 @@ STM32任务堆栈为向上递增的堆栈 栈顶为最后一个元素
 15
 
 OSTaskNameSet()和OSTaskNameGet()这两个函数不能在中断服务程序中调用
+
+16
+
+在操作系统运行之前，利用OSTimeSet( )设置初始时间为0
+
+17任务的同步和通信
+
+同步：两个任务有序进行 e.g. 按下一个按键 点亮一个LED
+通信：不同任务之间数据的交互
+uCOS使用事件来管理任务间的同步和通信。把信号量，事件标志组，消息邮箱，消息队列统称为事件。
+
+```C
+//Event 类型定义
+#if OS_LOWEST_PRIO <= 63u
+typedef  INT8U    OS_PRIO;
+#else
+typedef  INT16U   OS_PRIO;
+#endif
+
+#if (OS_EVENT_EN) && (OS_MAX_EVENTS > 0u)
+typedef struct os_event {
+    INT8U    OSEventType;                    /* Type of event control block (see OS_EVENT_TYPE_xxxx)    */
+    void    *OSEventPtr;                     /* Pointer to message or queue structure                   */
+    INT16U   OSEventCnt;                     /* Semaphore(信号) Count (not used if other EVENT type)          */
+    OS_PRIO  OSEventGrp;                     /* Group corresponding to tasks waiting for event to occur */
+    OS_PRIO  OSEventTbl[OS_EVENT_TBL_SIZE];  /* List of tasks waiting for event to occur                */
+
+#if OS_EVENT_NAME_EN > 0u
+    INT8U   *OSEventName;
+#endif
+} OS_EVENT;
+#endif
+```
+
+18
+
+信号量（Sem）:semaphore 也有旗语的意思
+配置：关于此操作都在os_cfg.h中
+二值信号量：0，1 通常使用在对共享资源的保护
+计数型信号量：初始值是大于1
+信号量使用方法：
+```C
+OS_EVENT  *OSSem_Creat(INT16U cnt)//建立 返回一个事件
+void  OSSemPend (OS_EVENT  *pevent,
+                 INT32U     timeout,
+                 INT8U     *perr)//等待 不允许在中断中等待
+INT8U  OSSemPost (OS_EVENT *pevent)//发送 返回一个状态信息
+//OS_ERR_NONE         The call was successful and the semaphore was signaled.
+//OS_ERR_SEM_OVF ...
+```
+句柄与普通指针的区别在于，指针包含的是引用对象的内存地址，而句柄则是由系统所管理的引用标识，该标识可以被系统重新定位到一个内存地址上。这种间接访问对象的模式增强了系统对引用对象的控制。通俗的说就是我们调用句柄就是调用句柄所提供的服务，即句柄已经把它能做的操作都设定好了，我们只能在句柄所提供的操作范围内进行操作，但是普通指针的操作却多种多样，不受限制。
+
+OSSemPend 是一个阻塞式等待过程,所以不能用于中断服务函数中.
+
+OSSemAccept
+```C
+INT16U  OSSemAccept (OS_EVENT *pevent) //查询资源是否可用
+```
+非阻塞式等待过程,可以用于中断服务函数
+
+```C
+OS_EVENT  *OSSemDel (OS_EVENT  *pevent,
+                     INT8U      opt,
+                     INT8U     *perr)//删除任务
+```
+一般信号量不被任何任务等待的时候才可以删除. 返回值为空指针 如果删除成功的话
+
+```C
+void  OSSemSet (OS_EVENT  *pevent,
+                INT16U     cnt,
+                INT8U     *perr)//设置信号量资源数量,cnt 置为0时 表示重置该信号量
+```
+
+19
+
+互斥性信号量(Mutex) 类似信号量中的二值信号量. 经常用来对共享资源进行保护. 对优先级反转进行解决
+需要建立 等待 发送过程.类似信号量(Sem)
+```C
+OS_EVENT  *OSMutexCreate (INT8U   prio,//要提高到哪个优先级 必须是高于可能使用该信号量的所有任务的优先级
+                          INT8U  *perr)
+
+void  OSMutexPend (OS_EVENT  *pevent,
+                   INT32U     timeout,
+                   INT8U     *perr)//等待
+
+INT8U  OSMutexPost (OS_EVENT *pevent)//发送
+
+```
