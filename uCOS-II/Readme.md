@@ -231,4 +231,28 @@ void  OSMutexPend (OS_EVENT  *pevent,
 
 INT8U  OSMutexPost (OS_EVENT *pevent)//发送
 
+例如串口作为共享资源,如果在led beep key任务中都需要使用串口打印, 就需要对串口资源进行保护
+
+20
+
+事件标志组(Flag) uCOS 默认用一个16位的数表示
+```C
+OS_FLAG_GRP  *OSFlagCreate (OS_FLAGS  flags,
+                            INT8U    *perr)
+
+OS_FLAGS  OSFlagPend (OS_FLAG_GRP  *pgrp,
+                      OS_FLAGS      flags,
+                      INT8U         wait_type,//全为0 全为1 任何一位被置0或置1
+
+ //                                 Example, to wait for any flag in a group AND then clear
+//                                  the flags that are present, set 'wait_type' to:
+//                                  OS_FLAG_WAIT_SET_ANY + OS_FLAG_CONSUME
+                      INT32U        timeout,// =0 表示一直等待下去
+                      INT8U        *perr)
+
+OS_FLAGS  OSFlagPost (OS_FLAG_GRP  *pgrp,
+                      OS_FLAGS      flags,
+                      INT8U         opt,
+                      INT8U        *perr)
+
 ```
