@@ -256,3 +256,112 @@ OS_FLAGS  OSFlagPost (OS_FLAG_GRP  *pgrp,
                       INT8U        *perr)
 
 ```
+
+21
+
+消息邮箱
+```C
+OS_EVENT  *OSMboxCreate (void *pmsg)//创建消息邮箱
+void  *OSMboxPend (OS_EVENT  *pevent,
+                   INT32U     timeout,
+                   INT8U     *perr)//等待消息邮箱
+//returnS:    != (void *)0  is a pointer to the message received
+//*           == (void *)0  if no message was received
+INT8U  OSMboxPost (OS_EVENT  *pevent,
+                   void      *pmsg)//发送消息邮箱
+
+```
+
+22
+
+消息队列Queue:很多消息邮箱按一定顺序排列.先进先出 后进先出
+```C
+OS_EVENT  *OSQCreate (void    **start,//指向数组地址的指针 双指针
+                      INT16U    size)
+
+INT8U  OSQPost (OS_EVENT  *pevent,//指向消息队列创建的事件
+                void      *pmsg)//发送的消息
+
+void  *OSQPend (OS_EVENT  *pevent,
+                INT32U     timeout,//=0表示死等待
+                INT8U     *perr)
+//Returns: 返回值是一个指向收到信息的地址(指针)
+
+```
+
+23
+内存申请:void* malloc(sizeof());//申请一定空间的内存 返回该空间的首地址
+从内存条的`堆`中申请内存
+内存释放:free
+用户使用malloc和free会产生内存碎片
+uCOS为了解决内存碎片问题 使用块机制(block)
+要使用内存块,需要用OSMemCreate()创造内存块 交给uCOS来管理
+```C
+//创建一个分区
+OS_MEM  *OSMemCreate (void  *addr,//首地址
+                      INT32U  nblks,//划分块数
+                      INT32U  blksize,//每一块大小
+                      INT8U  *perr)//错误码
+
+//申请一个内存块
+void  *OSMemGet (OS_MEM  *pmem,//分区名
+                 INT8U   *perr)//错误码
+//返回首地址
+
+//释放一个内存块
+INT8U  OSMemPut (OS_MEM  *pmem,//分区名
+                 void    *pblk)//内存块地址
+```
+
+24static
+
+静态局部变量:生存周期是整个源程序,但是只能在该函数内使用
+静态全局变量: 非静态全局 变量的作用域是整个源程序， 当一个源程序由多个源文件组成时，非静态的全局变量在各个源文件中都是有效的。 而静态全局变量则限制了其作用域， 即只在 定义该变量的源文件内有效， 在同一源程序的其它源文件中不能使用它。由于静态全局变量的作用域局限于一个源文件内，只能为该源文件内的函数公用， 因此 可以避免在其它源文件中引起错误。
+
+25
+
+指针数组：首先它是一个数组，数组的元素都是指针，数组占多少个字节由数组本身决定。它是“储存指针的数组”的简称。
+数组指针：首先它是一个指针，它指向一个数组。在32 位系统下永远是占4 个字节，至于它指向的数组占多少字节，不知道。它是“指向数组的指针”的简称。
+
+26
+
+栈区（stack）— 由编译器自动分配释放 ，存放函数的参数值，局部变量的值等。其操作方式类似于数据结构中的栈。
+堆区（heap） — 一般由程序员分配释放， 若程序员不释放，程序结束时可能由OS回收 。
+
+申请方式
+stack:
+由系统自动分配。 例如，声明在函数中一个局部变量 int b; 系统自动在栈中为b开辟空间
+heap:
+需要程序员自己申请，并指明大小，在c中malloc函数
+如p1 = (char *)malloc(10);
+
+申请大小的限制
+栈：在Windows下,栈是向低地址扩展的数据结构，是一块连续的内存的区域。这句话的意思是栈顶的地址和栈的最大容量是系统预先规定好的，在WINDOWS下，栈的大小是2M（也有的说是1M，总之是一个编译时就确定的常数），如果申请的空间超过栈的剩余空间时，将提示overflow。因此，能从栈获得的空间较小。
+堆：堆是向高地址扩展的数据结构，是不连续的内存区域。这是由于系统是用链表来存储的空闲内存地址的，自然是不连续的，而链表的遍历方向是由低地址向高地址。堆的大小受限于计算机系统中有效的虚拟内存。由此可见，堆获得的空间比较灵活，也比较大。
+
+27定时器
+
+uCOS提供的是软件定时器.
+好处: 使用一个硬件定时器来产生很多定时器 无上限.使用方便,由操作系统管理.
+缺点:精度不高 定时时间稍长
+
+```C
+OS_TMR  *OSTmrCreate (INT32U           dly,//启动多少时间后开始运行
+                      INT32U           period,//周期
+                      INT8U            opt,//选项 一次定时器 还是 周期定时器
+                      OS_TMR_CALLBACK  callback,//回调函数
+                      void            *callback_arg,
+                      INT8U           *pname,
+                      INT8U           *perr)//定时器创建
+
+#define OS_TMR_CFG_WHEEL_SIZE     8u   /*     Size of timer wheel (#Spokes)   */ //定时器轮转查询是否到达设定时间的轮转个数
+```
+回调函数: 系统反过来调用应用程序的代码
+
+29移植
+
+与处理器有关的需要移植的代码:uC/OS-II Ports目录 内核相关文件
+os_cpu_c.c, os_cpu_a.asm, os_cpu.h, os_dbg_r.c, os_dbg.c
+还有板级支持包 包括启动代码 库函数 如 startup_stm32f40_41xxx.s
+
+
