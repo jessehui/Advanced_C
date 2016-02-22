@@ -364,4 +364,23 @@ OS_TMR  *OSTmrCreate (INT32U           dly,//启动多少时间后开始运行
 os_cpu_c.c, os_cpu_a.asm, os_cpu.h, os_dbg_r.c, os_dbg.c
 还有板级支持包 包括启动代码 库函数 如 startup_stm32f40_41xxx.s
 
+移植时 UCOSII/CORE中的ucos_ii.c不用添加 该文件重新定义了数据类型别名 避免重复定义 产生冲突
+关于debug相关的都不需要添加
 
+关于os_core.c:
+OSInitHookBegin();钩子函数 附带在某个任务执行中的函数 一般为空
+OSSchedLock();调度器上锁
+一般core文件中的函数不需要修改和调用
+
+关于os_cpu.h:
+一般需要修改的是栈的增长方向,和进入退出临界段代码的实现方法
+//OS_CRITICAL_METHOD = 1 :直接使用处理器的开关中断指令来实现宏
+//OS_CRITICAL_METHOD = 2 :利用堆栈保存和恢复CPU的状态
+//OS_CRITICAL_METHOD = 3 :利用编译器扩展功能获得程序状态字，保存在局部变量cpu_sr
+
+关于os_cfg.h:
+以_EN结尾的都是开关量,1打开,0关闭
+```C
+#define OS_TICKS_PER_SEC       1000u   /* Set the number of ticks in one second                        */
+```
+每秒调度1000次 即每1ms调度一次,实时性高 但是系统无用功多 需要综合考虑
