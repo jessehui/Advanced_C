@@ -380,5 +380,7 @@ OSSchedLock();调度器上锁
 
 关于os_cfg.h:
 以_EN结尾的都是开关量,1打开,0关闭
+```C
 #define OS_TICKS_PER_SEC       1000u   /* Set the number of ticks in one second                        */
+```
 每秒调度1000次 即每1ms调度一次,实时性高 但是系统无用功多 需要综合考虑
