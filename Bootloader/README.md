@@ -15,8 +15,12 @@ MMU:内存管理单元（英语：memory management unit，缩写为MMU），有
 * 跳到C语言中(让sp堆栈指针指向可读可写的设备中) 满足递减栈的规则(sp指针往下走 尽量放高段地址)
 ATPCS标准:ATPCS即ARM-THUMB procedure call standard（ARM-Thumb过程调用标准）的简称。
 PCS强制实现如下约定：调用函数如何传递参数（即压栈方法，以何种方式存放参数），被调用函数如何获取参数，以何种方式传递函数返回值。
+用哪些模式(SVC,IRQ,USR等)就初始化哪些模式下的;每个模式的值不能覆盖其他模式
 
-*跳转到main
+* 代码搬移
+执行速度问题,比如把存储器(nand-flash)搬移到内存上. 需要对对应存储器的控制器进行初始化
+
+* 跳转到main
 ```Assembly
 MOV sp, #200000
 BL MAIN
@@ -32,7 +36,7 @@ BL MAIN
 * 它并不包括一整套标准的Linux使用程序
 　　Android并没有完全照搬Liunx系统的内核，除了修正部分Liunx的Bug之外，还增加了不少内容，比如：它基于ARM构架增加的Gold-Fish平台，以及yaffs2 FLASH文件系统等。
 
-*Android专有的驱动程序
+* Android专有的驱动程序
 
 glibc是gnu发布的libc库，也即c运行库。glibc是linux 系统中最底层的api（应用程序开发接口），几乎其它任何的运行库都会倚赖于glibc。glibc除了封装linux操作系统所提供的系统服务外，它本身也提供了许多其它一些必要功能服务的实现，主要的如下：
 （1）string，字符串处理
@@ -57,3 +61,11 @@ loader目的: 执行应用逻辑,点灯,uart, load Linux kernel
 
 
 ###2
+U-Boot: 全称 Universal Boot Loader，是遵循GPL条款的开放源码项目。从FADSROM、8xxROM、PPCBOOT逐步发展演化而来。其源码目录、编译形式与Linux内核很相似，事实上，不少U-Boot源码就是根据相应的Linux内核源程序进行简化而形成的，尤其是一些设备的驱动程序，这从U-Boot源码的注释中能体现这一点。
+
+ Flash编程原理都是只能将1写为0，而不能将0写成1.所以在Flash编程之前，必须将对应的块擦除，而擦除的过程就是将所有位都写为1的过程，块内的所有字节变为0xFF.因此可以说，编程是将相应位写0的过程，而擦除是将相应位写1的过程，两者的执行过程完全相反.
+
+ 最先出现的Nor flash，采用并口输入输出数据，速度快，CPU可以直接从Nor Flash中取指令执行专门术语叫XIP (eXecute In Place），但是价格昂贵，同时，由于要占用地址线，容量不能很大。基于以上的缺点，三星公司开发了Nand Flash结构，这种结构采用串行数据存储，而且使用块存储，故而容量可以很高。但是它的缺点是程序不能直接在Nand Flash中运行，只能拷贝到NorFlash或者是RAM中运行，这样程序启动的过程中就存在一个程序拷贝的过程，这个过程主要在Nor Flash中运行。
+
+所以，一般NorFlash用作存放BootLoader（这部分内容也类似于PC中的BIOS和MBR），主要是在单片机上电后，执行将Nand Flash中的程序拷贝到RAM中，然后将CPU控制权交给RAM中的程序（用户自己编写的函数或者是系统内核）。所以，一般的嵌入式系统中都带有容量较小的Nor Flash和大容量的Nand Flash。Nor Flash主要用来存放引导程序，而Nand Flash存放用户真正的程序。如果使用操作系统，一般内核比较大，系统启动过程比较慢，大约5-10秒不等，这个过程中主要执行开机自检和硬件初始化以及程序拷贝。
+ 由于NorFlash地址线和数据线分开，所以NorFlash芯片可以像SDRAM一样连在数据线上.NOR芯片的使用类似于通常内存芯片，传输效率高，可执行程序可以在芯片内执行(XI P, eXecute In Place)，这样应用程序可以直接在flash闪存内运行，不必再把代码读到系统RAM中.由于NorFlash的这个特点，嵌入式系统中经常将NOR芯片做启动芯片使用.NandFlash共用地址和数据总线，需要额外联结一些控制的输入输出，所以直接将NAND芯片做启动芯片比较难.
