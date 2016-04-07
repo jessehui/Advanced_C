@@ -26,7 +26,7 @@ LDFLAGS += -Tuboot.lds
 ifeq ($(ENV),RAM)
 LDFLAGS += -Ttext=0x0	#链接代码段地址 如果从RAM启动,链接RAM基地址0
 else
-LDFLAGS += -Ttext=0x200000000 #SD卡启动基地址
+LDFLAGS += -Ttext=0x20000000 #SD卡启动基地址
 endif
 
 #define way 操作方式
