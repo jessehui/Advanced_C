@@ -1,11 +1,13 @@
 .global _start 		
-
+.global main	/*global variable*/
 _start:
 	mov r0,#0x11
 	mov r1,#0x32
 	add r2,r1,r0
 
-loop:
-	b loop	
+	bl main
 
+loop:
+	b loop			
+	
 	.end

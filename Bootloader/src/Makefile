@@ -5,7 +5,7 @@ TARGET 	:= 	led.bin #最终目标
 BUILD 	:=	led	
 
 COBJS 	+= 	start.o
-#COBJS 	+= 	main.o
+COBJS 	+= 	main.o
 #COBJS 	+= 	delay.o 
 
 ENV 	?= 	SD	#ENV未定义的话就定义为SD
@@ -22,6 +22,7 @@ CFLAGS 	+= -Wall 	#所有警告打开 warning
 CFLAGS 	+= -I./inc	#增加查找头文件的路径 当前目录下的inc目录中寻找头文件
 
 #链接选项
+LDFLAGS += -Tuboot.lds
 ifeq ($(ENV),RAM)
 LDFLAGS += -Ttext=0x0	#链接代码段地址 如果从RAM启动,链接RAM基地址0
 else
