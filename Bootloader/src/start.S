@@ -1,4 +1,4 @@
-.global _start 		;定义全局变量
+.global _start 		
 
 _start:
 	mov r0,#0x11
@@ -6,6 +6,6 @@ _start:
 	add r2,r1,r0
 
 loop:
-	b loop	;死循环
+	b loop	
 
 	.end

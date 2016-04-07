@@ -12,7 +12,7 @@ ENV 	?= 	SD	#ENV未定义的话就定义为SD
 SDTOOLS := 	./mk210
 
 #工具集
-CROSS_COMPILE := arm-linux-
+CROSS_COMPILE := arm-linux-gnueabihf-
 CC 	:= $(CROSS_COMPILE)gcc
 LD 	:= $(CROSS_COMPILE)ld	#链接器
 OBJCOPY := $(CROSS_COMPILE)objcopy
