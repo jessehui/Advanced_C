@@ -23,14 +23,14 @@ CFLAGS 	+= -I./inc	#增加查找头文件的路径 当前目录下的inc目录�
 
 #链接选项
 LDFLAGS += -Tuboot.lds
-ifeq ($(ENV),RAM)
-LDFLAGS += -Ttext=0x0	#链接代码段地址 如果从RAM启动,链接RAM基地址0
+ifeq ($(ENV),SD)
+LDFLAGS += -Ttext=0x0	#链接代码段地址 如果从SD启动,链接SD基地址0
 else
-LDFLAGS += -Ttext=0x20000000 #SD卡启动基地址
+LDFLAGS += -Ttext=0x20000000 #RAM启动基地址
 endif
 
 #define way 操作方式
-all:$(TARGET)
+all:$(TARGET) 
 
 ifeq ($(ENV),RAM)
 $(TARGET):$(BUILD)
