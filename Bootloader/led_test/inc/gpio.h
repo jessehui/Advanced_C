@@ -22,4 +22,8 @@ struct s5pv210_gpio
 	
 };
 
+//base address
+#define GPIO_BASE (0xE0200000)
+
+
 #endif
